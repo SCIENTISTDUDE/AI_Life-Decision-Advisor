@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compass AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--sidebar:rgba(15,15,30,0.85);--inp-bg:rgba(255,255,255,0.06);
+  --surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
+  --text:#e8e8f0;--muted:#8888a4;--dim:#555;
+  --accent:#a78bfa;--acc2:#8b5cf6;
+  --green:#4ade80;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;--teal:#2dd4bf;
+  --glow:rgba(139,92,246,0.15);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;font-size:15px;line-height:1.6;
+  background:linear-gradient(135deg,#0f0f1a 0%,#1a1028 40%,#0f1a2e 70%,#0f0f1a 100%);
+  background-size:400% 400%;animation:bgShift 20s ease infinite}
+@keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.25);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:rgba(139,92,246,0.4)}
+
+/* ── SIDEBAR ── */
+.sidebar{width:260px;flex-shrink:0;background:var(--sidebar);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;height:100vh;border-right:1px solid var(--border)}
+.sb-top{padding:10px}
+.new-btn{width:100%;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;gap:9px;transition:background .15s}
+.new-btn:hover{background:rgba(255,255,255,0.06)}
+.sb-label{padding:12px 14px 4px;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:500}
+.sb-chats{flex:1;overflow-y:auto;padding:0 6px}
+.chat-row{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px;transition:all .15s;margin-bottom:2px}
+.chat-row:hover,.chat-row.on{background:rgba(255,255,255,0.06);color:var(--text)}
+.sb-bot{padding:10px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:rgba(255,255,255,0.06)}
+.av-ring{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ab82ff);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:500}
+.sb-uplan{font-size:11px;color:var(--muted)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* topbar */
+.topbar{padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(15,15,30,0.5);backdrop-filter:blur(12px)}
+.model-pill{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s}
+.model-pill:hover{background:rgba(255,255,255,0.05)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tb-right{display:flex;gap:8px}
+.tb-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.tb-btn:hover{background:rgba(255,255,255,0.05);color:var(--text)}
+
+/* messages scroll */
+.msgs-scroll{flex:1;overflow-y:auto}
+.msgs-inner{max-width:720px;margin:0 auto;padding:28px 20px 12px}
+
+/* welcome */
+.welcome{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 20px 32px;min-height:55vh;justify-content:center}
+.wlogo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#7c3aed,#ab82ff);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 18px;box-shadow:0 0 40px rgba(139,92,246,0.35);animation:logoFloat 3s ease-in-out infinite}
+@keyframes logoFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.05)}}
+.welcome h2{font-size:26px;font-weight:600;letter-spacing:-.5px;margin-bottom:8px;animation:fadeSlideUp .6s ease both}
+.welcome-sub{font-size:15px;color:var(--muted);max-width:400px;margin:0 auto 28px;line-height:1.65;animation:fadeSlideUp .6s ease .15s both}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.wgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:500px}
+.wcard{padding:16px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);cursor:pointer;text-align:left;transition:all .3s cubic-bezier(.4,0,.2,1);font-family:'Inter',sans-serif;animation:cardPop .5s cubic-bezier(.4,0,.2,1) both}
+.wcard:nth-child(1){animation-delay:.2s}.wcard:nth-child(2){animation-delay:.3s}.wcard:nth-child(3){animation-delay:.4s}.wcard:nth-child(4){animation-delay:.5s}.wcard:nth-child(5){animation-delay:.6s}.wcard:nth-child(6){animation-delay:.7s}
+@keyframes cardPop{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+.wcard:hover{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.1);transform:translateY(-3px) scale(1.02);box-shadow:0 8px 25px rgba(139,92,246,0.15)}
+.wcard:active{transform:translateY(0) scale(.97);transition:transform .1s}
+.wcard-icon{font-size:20px;margin-bottom:7px;transition:transform .3s}
+.wcard:hover .wcard-icon{transform:scale(1.2) rotate(-5deg)}
+.wcard-title{font-size:13px;font-weight:500;margin-bottom:3px}
+.wcard-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* message rows */
+.mrow{padding:18px 0;display:flex;gap:14px;animation:fadeUp .4s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.mrow.user{flex-direction:row-reverse}
+.mav{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;margin-top:1px}
+.mrow.bot .mav{background:linear-gradient(135deg,#7c3aed,#ab82ff)}
+.mrow.user .mav{background:#374151;font-size:12px}
+.mbody{flex:1;max-width:88%}
+.mrow.user .mbody{display:flex;justify-content:flex-end}
+.mname{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.mtime{font-size:10px;color:var(--dim);margin-left:8px;text-transform:none;letter-spacing:0;font-weight:400}
+
+/* user bubble */
+.user-bubble{background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(96,165,250,0.1));border:1px solid rgba(139,92,246,0.2);padding:12px 18px;border-radius:20px 20px 4px 20px;font-size:14px;line-height:1.65;max-width:88%;backdrop-filter:blur(8px)}
+
+/* bot content */
+.bot-content{font-size:15px;line-height:1.75;color:var(--text)}
+.bot-content p{margin-bottom:10px}
+.bot-content p:last-child{margin-bottom:0}
+.bot-content strong{font-weight:600}
+.bot-content em{font-style:italic;color:var(--muted)}
+.bot-content ul{padding-left:22px;margin-bottom:10px}
+.bot-content ol{padding-left:22px;margin-bottom:10px}
+.bot-content li{margin-bottom:5px;line-height:1.65}
+.bot-content h1,.bot-content h2,.bot-content h3{font-weight:600;margin:14px 0 6px;line-height:1.3}
+.bot-content h1{font-size:18px}
+.bot-content h2{font-size:16px}
+.bot-content h3{font-size:15px}
+.bot-content code{background:#1a1a2e;padding:1px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono',monospace;color:#a78bfa}
+.bot-content pre{background:#1a1a2e;border:1px solid var(--border);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0}
+.bot-content pre code{background:none;padding:0;font-size:13px;color:#e2e8f0}
+.bot-content blockquote{border-left:3px solid var(--acc2);padding-left:14px;color:var(--muted);margin:10px 0}
+.bot-content hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+.bot-content a{color:var(--blue);text-decoration:underline}
+.bot-content table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+.bot-content th,.bot-content td{padding:8px 12px;border:1px solid var(--border);text-align:left}
+.bot-content th{background:var(--surface);font-weight:600}
+
+/* special compass tags rendered inside markdown */
+.compass-pro{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);margin-right:6px;vertical-align:middle}
+.compass-con{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2);margin-right:6px;vertical-align:middle}
+.compass-key{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2);margin-right:6px;vertical-align:middle}
+.compass-fact{display:block;padding:9px 13px;background:rgba(96,165,250,.07);border-left:3px solid #60a5fa;border-radius:0 8px 8px 0;font-size:13px;color:#93c5fd;margin:8px 0}
+.compass-rec{display:block;padding:11px 14px;background:rgba(139,92,246,.08);border-left:3px solid #8b5cf6;border-radius:0 10px 10px 0;font-size:14px;margin:10px 0;line-height:1.65}
+.compass-search{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.2);border-radius:20px;font-size:11px;color:var(--teal);font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+
+/* msg actions */
+.macts{display:flex;gap:4px;margin-top:8px;opacity:0;transition:opacity .2s}
+.mrow:hover .macts{opacity:1}
+.mact{padding:4px 9px;border-radius:6px;border:none;background:none;color:var(--dim);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:flex;align-items:center;gap:4px}
+.mact:hover{background:rgba(255,255,255,.05);color:var(--muted)}
+
+/* typing */
+.typing-row{padding:14px 0;display:flex;gap:14px;align-items:center}
+.tdots{display:flex;gap:4px;padding:12px 16px;background:var(--surface);border-radius:12px}
+.tdot{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:tdot 1.2s infinite}
+.tdot:nth-child(2){animation-delay:.2s}
+.tdot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{opacity:.3;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+.tlabel{font-size:12px;color:var(--teal);font-family:'JetBrains Mono',monospace;margin-left:10px}
+
+/* progress bar */
+.think-progress{position:absolute;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--acc2),var(--accent),var(--teal),var(--accent));background-size:300% 100%;animation:progressShimmer 1.8s ease infinite;border-radius:0 2px 2px 0;transition:width .4s ease;z-index:10}
+@keyframes progressShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* scroll to bottom FAB */
+.scroll-fab{position:absolute;bottom:100px;right:28px;width:38px;height:38px;border-radius:50%;background:rgba(139,92,246,0.85);border:1px solid rgba(139,92,246,0.4);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 15px rgba(139,92,246,0.3);z-index:5;backdrop-filter:blur(8px)}
+.scroll-fab.show{opacity:1;pointer-events:auto}
+.scroll-fab:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(139,92,246,0.45)}
+.scroll-fab:active{transform:scale(.95)}
+
+/* message reactions */
+.mreact{display:flex;gap:3px;margin-top:6px}
+.react-btn{padding:3px 8px;border-radius:6px;border:1px solid transparent;background:none;color:var(--dim);font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:3px}
+.react-btn:hover{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--muted)}
+.react-btn.active{border-color:rgba(139,92,246,.4);color:var(--accent);background:rgba(139,92,246,.1)}
+.react-btn.active.thumbs-down{border-color:rgba(248,113,113,.3);color:#f87171;background:rgba(248,113,113,.08)}
+@keyframes reactPop{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+
+/* suggestions */
+.sugs{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;animation:fadeSlideUp .4s ease both}
+.sug{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.sug:hover{border-color:rgba(171,130,255,.5);color:var(--accent);background:rgba(139,92,246,.07);transform:translateY(-1px)}
+.sug:active{transform:scale(.96)}
+
+/* ── INPUT ── */
+.inp-area{padding:14px 20px 18px;flex-shrink:0}
+.inp-box{max-width:720px;margin:0 auto}
+.inp-inner{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:12px 16px 10px;display:flex;flex-direction:column;gap:9px;transition:all .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(12px)}
+.inp-inner:focus-within{border-color:rgba(139,92,246,.5);box-shadow:0 0 20px rgba(139,92,246,0.12),0 0 40px rgba(139,92,246,0.06)}
+textarea#inp{background:none;border:none;outline:none;width:100%;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);resize:none;height:24px;max-height:160px;line-height:1.6}
+textarea#inp::placeholder{color:var(--dim)}
+.inp-btns{display:flex;align-items:center;gap:7px}
+.ctl{padding:5px 11px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .25s;display:flex;align-items:center;gap:5px}
+.ctl:hover{background:rgba(255,255,255,.06);color:var(--text);transform:translateY(-1px)}
+.ctl.on{border-color:rgba(139,92,246,.4);color:var(--accent);background:rgba(139,92,246,.1);box-shadow:0 0 12px rgba(139,92,246,0.1)}
+.voice-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+.voice-btn:hover{background:rgba(139,92,246,.1);color:var(--accent);border-color:rgba(139,92,246,.4)}
+.voice-btn.recording{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.5);color:#f87171;animation:voicePulse 1.2s ease infinite}
+@keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.3)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
+.send{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:auto;transition:all .25s;flex-shrink:0;box-shadow:0 0 15px rgba(139,92,246,0.25)}
+.send:hover{transform:scale(1.08);box-shadow:0 0 25px rgba(139,92,246,0.4)}
+.send:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.send svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.5}
+.inp-note{text-align:center;font-size:11px;color:var(--dim);padding-top:7px}
+
+/* typewriter cursor */
+.typing-cursor{display:inline-block;width:2px;height:1.1em;background:var(--accent);margin-left:2px;animation:blink .55s step-end infinite;vertical-align:text-bottom;border-radius:1px;box-shadow:0 0 6px rgba(167,139,250,0.5)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ripple */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.18);transform:scale(0);animation:rippleAnim .5s ease-out forwards;pointer-events:none}
+@keyframes rippleAnim{to{transform:scale(2.5);opacity:0}}
+
+/* TTS controls */
+.tts-btn{padding:4px 9px;border-radius:6px;border:none;background:none;color:var(--dim);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:flex;align-items:center;gap:4px}
+.tts-btn:hover{background:rgba(255,255,255,.05);color:var(--accent)}
+.tts-btn.speaking{color:var(--accent)}
+
+/* cursor glow */
+.cursor-glow{position:fixed;width:320px;height:320px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(139,92,246,0.08) 0%,rgba(139,92,246,0.03) 40%,transparent 70%);transform:translate(-50%,-50%);transition:left .3s ease-out,top .3s ease-out,opacity .4s;opacity:0}
+.cursor-glow.visible{opacity:1}
+
+/* floating orbs canvas */
+#orb-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.main,.sidebar{position:relative;z-index:1}
+
+/* improved welcome card hover glow */
+.wcard{position:relative;overflow:hidden}
+.wcard::before{content:'';position:absolute;top:var(--mouse-y,50%);left:var(--mouse-x,50%);width:200px;height:200px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%);transform:translate(-50%,-50%);opacity:0;transition:opacity .3s;pointer-events:none;border-radius:50%}
+.wcard:hover::before{opacity:1}
+
+/* shine line on sidebar chat rows */
+.chat-row{position:relative;overflow:hidden}
+.chat-row::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);transition:left .5s ease}
+.chat-row:hover::after{left:120%}
+
+/* improved send button ripple */
+.send{position:relative;overflow:hidden}
+.send::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,0.25),transparent 60%);opacity:0;transition:opacity .2s}
+.send:hover::after{opacity:1}
+
+/* bot message entrance */
+.mrow.bot{animation:fadeUp .4s cubic-bezier(.4,0,.2,1), glowIn .6s ease}
+@keyframes glowIn{from{filter:brightness(1.3) drop-shadow(0 0 10px rgba(139,92,246,.3))}to{filter:brightness(1) drop-shadow(0 0 0 transparent)}}
+
+@media(max-width:680px){.sidebar{display:none}.msgs-inner{padding:16px 12px}.wgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="cursor-glow" id="cursor-glow"></div>
+<canvas id="orb-canvas"></canvas>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-top">
+    <button class="new-btn" onclick="newChat()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New chat
+    </button>
+  </div>
+  <div class="sb-label">Today</div>
+  <div class="sb-chats" id="sb-chats">
+    <div class="chat-row on" id="active-chat">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>New conversation</span>
+    </div>
+  </div>
+  <div class="sb-bot">
+    <div class="sb-user">
+      <div class="av-ring">🧭</div>
+      <div>
+        <div class="sb-uname">Compass AI</div>
+        <div class="sb-uplan">Life Decision Advisor</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="topbar">
+    <button class="model-pill">
+      <div class="live-dot"></div>
+      Compass AI
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.4"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="exportChat()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="tb-btn" onclick="newChat()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New chat
+      </button>
+    </div>
+  </div>
+
+  <div class="msgs-scroll" id="msgs-scroll">
+    <div class="think-progress" id="think-progress" style="width:0%;display:none"></div>
+    <div class="msgs-inner" id="msgs-inner">
+
+      <div class="welcome" id="welcome">
+        <div class="wlogo">🧭</div>
+        <h2>What would you like to decide?</h2>
+        <p class="welcome-sub">Your AI life decision advisor — powered by Claude with live web search. Get honest, structured guidance on any life choice.</p>
+        <div class="wgrid">
+          <div class="wcard" onclick="quickSend('I am thinking about changing my career. Help me think through it.')">
+            <div class="wcard-icon">🧳</div>
+            <div class="wcard-title">Career change</div>
+            <div class="wcard-desc">Job switch, promotion, freelance</div>
+          </div>
+          <div class="wcard" onclick="quickSend('I need help with a relationship decision I am struggling with.')">
+            <div class="wcard-icon">❤️</div>
+            <div class="wcard-title">Relationship</div>
+            <div class="wcard-desc">Commitment, breakup, marriage</div>
+          </div>
+          <div class="wcard" onclick="quickSend('Should I start my own business? I have an idea but I am scared.')">
+            <div class="wcard-icon">💼</div>
+            <div class="wcard-title">Start a business</div>
+            <div class="wcard-desc">Startup, side hustle, going solo</div>
+          </div>
+          <div class="wcard" onclick="quickSend('I feel completely stuck in life and don\'t know what to do next.')">
+            <div class="wcard-icon">🌱</div>
+            <div class="wcard-title">Feeling stuck</div>
+            <div class="wcard-desc">Purpose, direction, life change</div>
+          </div>
+          <div class="wcard" onclick="quickSend('Should I go back to university or learn a skill online instead?')">
+            <div class="wcard-icon">🎓</div>
+            <div class="wcard-title">Education</div>
+            <div class="wcard-desc">Degree, courses, going back to school</div>
+          </div>
+          <div class="wcard" onclick="quickSend('Help me think through a big financial decision I need to make.')">
+            <div class="wcard-icon">💰</div>
+            <div class="wcard-title">Money & Finance</div>
+            <div class="wcard-desc">Investing, debt, big purchases</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="scroll-fab" id="scroll-fab" onclick="scrollToBottom()" title="Scroll to bottom">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+
+  <div class="inp-area">
+    <div class="inp-box">
+      <div class="inp-inner">
+        <textarea id="inp" placeholder="Message Compass AI..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="inp-btns">
+          <button class="ctl on" id="btn-search" onclick="toggleSearch()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Web Search
+          </button>
+          <button class="ctl" id="btn-mode" onclick="nextMode()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M20 12h-2M6 12H4M17.66 18.66l1.41-1.41M6.75 6.75l-1.41-1.41"/></svg>
+            <span id="mode-txt">Full Advisor</span>
+          </button>
+          <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" title="Voice input">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="1" width="6" height="11" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <button class="send" id="send-btn" onclick="sendMsg()">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="inp-note">Compass AI can make mistakes. Verify important decisions with professionals.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ══════════════════════════════════════════════════
+//  COMPASS AI — Powered by GROQ
+//  Works EVERYWHERE — any browser, any file, no CORS
+// ══════════════════════════════════════════════════
+const GROQ_KEY = '';
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+const MODES  = ['Full Advisor','Quick Take',"Devil's Advocate",'Action Coach'];
+let modeIdx  = 0;
+let useSearch = true;
+let history  = [];
+let loading  = false;
+let lastUser = '';
+
+// ── SYSTEM PROMPTS ──
+const GUARD_RULE = `
+IMPORTANT RULE — You MUST follow this strictly:
+You are ONLY allowed to answer questions related to life decisions, career, relationships, finance, education, health, personal growth, and well-being.
+If the user asks about ANY other topic — such as coding, programming, math, science, history, geography, general knowledge, trivia, technology, sports, entertainment, jokes, recipes, or anything unrelated to life decisions — you MUST refuse politely.
+When refusing, respond ONLY with:
+"🧭 I appreciate your curiosity! But I'm Compass — your **life decision advisor**. I can only help with questions about **career, relationships, finance, education, health, and personal life choices**. Try asking me something about a decision you're facing!"
+Do NOT answer the off-topic question at all. Do NOT give partial answers. Just refuse with the message above.`;
+
+function sysPrompt() {
+  const m = MODES[modeIdx];
+
+  if (m === 'Full Advisor') return `You are Compass, a warm honest AI life decision advisor with deep expertise in career, relationships, finance, education, health, and life decisions.
+${GUARD_RULE}
+
+Structure EVERY response exactly like this using markdown:
+
+(One empathetic opening sentence.)
+
+**✓ Pros**
+- First pro point with a real statistic or fact
+- Second pro point
+- Third pro point
+
+**✗ Cons**
+- First con point with a real statistic or fact
+- Second con point
+
+**↳ Key insight**
+One sentence revealing what is really driving this decision.
+
+**📊 Evidence**
+One specific real research finding or statistic with source name.
+
+**My recommendation**
+One or two direct honest sentences telling them what to do.
+
+→ Follow-up suggestion one
+→ Follow-up suggestion two
+→ Follow-up suggestion three
+
+Keep under 320 words. Be honest not just reassuring.`;
+
+  if (m === 'Quick Take') return `You are Compass, a brutally direct life advisor. Give a SHORT 3-4 sentence answer. Lead immediately with your honest opinion. Include one real fact. End with 2 suggestions starting with "→ ".
+${GUARD_RULE}`;
+
+  if (m === "Devil's Advocate") return `You are Compass playing Devil's Advocate. Challenge everything about the user's plan. Start with "Here is what you might be missing..." then list real risks as bullet points. Include one real challenging statistic. End with:
+→ I still want to do it
+→ Help me reduce these risks
+${GUARD_RULE}`;
+
+  if (m === 'Action Coach') return `You are Compass, a high-energy action coach. Give exactly 5 numbered concrete action steps to start TODAY. Make each step specific with a time estimate. Include one useful resource. End with 2 suggestions starting with "→ ".
+${GUARD_RULE}`;
+
+  return `You are Compass, a warm helpful life decision advisor. Answer clearly and helpfully.
+${GUARD_RULE}`;
+}
+
+// ── MARKDOWN → HTML ──
+function md(text) {
+  let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h = h.replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>`<pre><code>${c.trim()}</code></pre>`);
+  h = h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h = h.replace(/^---+$/gm,'<hr>');
+  h = h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h = h.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  h = h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+
+  const lines = h.split('\n');
+  const out = [];
+  let inUL=false,inOL=false;
+
+  for (let i=0;i<lines.length;i++) {
+    const l = lines[i];
+    if (/^[\-\*•→] (.+)/.test(l)) {
+      if (!inUL){out.push('<ul>');inUL=true;}
+      if (inOL){out.push('</ol>');inOL=false;}
+      out.push(`<li>${l.replace(/^[\-\*•→] /,'')}</li>`);
+      continue;
+    }
+    if (/^\d+\. (.+)/.test(l)) {
+      if (!inOL){out.push('<ol>');inOL=true;}
+      if (inUL){out.push('</ul>');inUL=false;}
+      out.push(`<li>${l.replace(/^\d+\. /,'')}</li>`);
+      continue;
+    }
+    if (inUL){out.push('</ul>');inUL=false;}
+    if (inOL){out.push('</ol>');inOL=false;}
+    if (!l.trim()){out.push('<div style="height:5px"></div>');continue;}
+    if (/^<(h[123]|hr|pre|blockquote)/.test(l)){out.push(l);continue;}
+    out.push(`<p>${l}</p>`);
+  }
+  if (inUL) out.push('</ul>');
+  if (inOL) out.push('</ol>');
+  return out.join('');
+}
+
+// ── CALL GROQ — works in ANY browser, ANY file ──
+async function callAPI(userMsg) {
+  const messages = [
+    { role:'system', content: sysPrompt() },
+    ...history,
+    { role:'user', content: userMsg }
+  ];
+
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_KEY}`
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: messages,
+      max_tokens: 1500,
+      temperature: 0.72
+    })
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(()=>({}));
+    throw new Error(e.error?.message || 'HTTP ' + res.status);
+  }
+
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content || 'No response received.';
+
+  history.push({ role:'user', content: userMsg });
+  history.push({ role:'assistant', content: text });
+  return text;
+}
+
+
+// ── DOM HELPERS ──
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+function addUserMsg(text) {
+  hideWelcome();
+  const inner = document.getElementById('msgs-inner');
+  const row = document.createElement('div');
+  row.className = 'mrow user';
+  const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  row.innerHTML = `
+    <div class="mav" style="font-size:12px;background:#374151">U</div>
+    <div class="mbody">
+      <div class="user-bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}<span class="mtime">${ts}</span></div>
+    </div>`;
+  inner.appendChild(row);
+  scroll();
+
+  // Update sidebar label
+  const ac = document.getElementById('active-chat');
+  if (ac) {
+    const sp = ac.querySelector('span');
+    if (sp && sp.textContent === 'New conversation') {
+      sp.textContent = text.length > 32 ? text.slice(0,32)+'…' : text;
+    }
+  }
+}
+
+function addTyping() {
+  hideWelcome();
+  const inner = document.getElementById('msgs-inner');
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  row.id = 'typing';
+  row.innerHTML = `
+    <div class="mav" style="background:linear-gradient(135deg,#7c3aed,#ab82ff)">🧭</div>
+    <div style="display:flex;align-items:center">
+      <div class="tdots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
+      <span class="tlabel" id="tlabel">${useSearch?'🌐 Searching the web...':'✍️ Thinking...'}</span>
+    </div>`;
+  inner.appendChild(row);
+  scroll();
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function addBotMsg(text) {
+  const inner = document.getElementById('msgs-inner');
+  const row = document.createElement('div');
+  row.className = 'mrow bot';
+
+  const av = document.createElement('div');
+  av.className = 'mav';
+  av.textContent = '🧭';
+  av.style.background = 'linear-gradient(135deg,#7c3aed,#ab82ff)';
+
+  const body = document.createElement('div');
+  body.className = 'mbody';
+
+  const name = document.createElement('div');
+  name.className = 'mname';
+  const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  name.innerHTML = `Compass AI <span class="mtime">${ts}</span>`;
+
+  // Search badge
+  const searchBadge = document.createElement('div');
+  if (useSearch) {
+    searchBadge.className = 'compass-search';
+    searchBadge.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Live web search used`;
+  }
+
+  const content = document.createElement('div');
+  content.className = 'bot-content';
+
+  const acts = document.createElement('div');
+  acts.className = 'macts';
+  acts.innerHTML = `
+    <button class="mact" onclick="copyMsg(this)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy
+    </button>
+    <button class="tts-btn" onclick="speakMsg(this)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      Read aloud
+    </button>
+    <button class="mact" onclick="regen()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.43"/></svg>
+      Regenerate
+    </button>`;
+
+  // Reaction buttons
+  const reacts = document.createElement('div');
+  reacts.className = 'mreact';
+  reacts.innerHTML = `
+    <button class="react-btn" onclick="reactMsg(this,'up')" title="Helpful">👍</button>
+    <button class="react-btn thumbs-down" onclick="reactMsg(this,'down')" title="Not helpful">👎</button>`;
+
+  body.appendChild(name);
+  if (useSearch) body.appendChild(searchBadge);
+  body.appendChild(content);
+  body.appendChild(acts);
+  body.appendChild(reacts);
+  row.appendChild(av);
+  row.appendChild(body);
+  inner.appendChild(row);
+
+  // Typewriter animation
+  typewriterEffect(content, text);
+}
+
+function copyMsg(btn) {
+  const c = btn.closest('.mbody').querySelector('.bot-content');
+  navigator.clipboard.writeText(c.innerText).then(()=>{
+    btn.textContent = '✓ Copied';
+    setTimeout(()=>btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`, 1800);
+  });
+}
+
+async function regen() {
+  if (loading || history.length < 2) return;
+  const uMsg = [...history].reverse().find(h=>h.role==='user');
+  if (!uMsg) return;
+  history = history.slice(0,-2);
+  const rows = document.querySelectorAll('.mrow.bot');
+  if (rows.length) rows[rows.length-1].remove();
+  await run(uMsg.content);
+}
+
+function scroll() {
+  const s = document.getElementById('msgs-scroll');
+  setTimeout(()=>s.scrollTop=s.scrollHeight, 60);
+}
+
+// ── SEND ──
+async function sendMsg() {
+  const inp = document.getElementById('inp');
+  const txt = inp.value.trim();
+  if (!txt || loading) return;
+  inp.value=''; inp.style.height='24px';
+  await run(txt);
+}
+
+async function run(txt) {
+  loading = true;
+  lastUser = txt;
+  document.getElementById('send-btn').disabled = true;
+
+  addUserMsg(txt);
+  addTyping();
+  startProgress();
+
+  // Animate label
+  const labels = useSearch
+    ? ['🌐 Searching the web...','📊 Reading results...','✍️ Writing response...','🧠 Analysing...']
+    : ['✍️ Thinking...','🧠 Reasoning...','📝 Writing...'];
+  let li = 0;
+  const iv = setInterval(()=>{
+    const el = document.getElementById('tlabel');
+    if (el) { li=(li+1)%labels.length; el.textContent=labels[li]; }
+  }, 1400);
+
+  try {
+    const reply = await callAPI(txt);
+    clearInterval(iv);
+    removeTyping();
+    stopProgress();
+    addBotMsg(reply);
+  } catch(err) {
+    clearInterval(iv);
+    removeTyping();
+    stopProgress();
+    addBotMsg(`**Error:** ${err.message}\n\nPlease check your API key and try again.`);
+  }
+
+  loading = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function quickSend(t){ document.getElementById('inp').value=t; sendMsg(); }
+function handleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function autoResize(el){ el.style.height='24px'; el.style.height=Math.min(el.scrollHeight,160)+'px'; }
+
+// ── TOGGLE SEARCH ──
+function toggleSearch() {
+  useSearch = !useSearch;
+  const btn = document.getElementById('btn-search');
+  btn.classList.toggle('on', useSearch);
+  btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> ${useSearch?'Web Search':'Search Off'}`;
+}
+
+// ── MODE ──
+function nextMode() {
+  modeIdx = (modeIdx+1) % MODES.length;
+  document.getElementById('mode-txt').textContent = MODES[modeIdx];
+}
+
+// ── NEW CHAT ──
+function newChat() {
+  history = [];
+  loading = false;
+  document.getElementById('send-btn').disabled = false;
+
+  // Archive old in sidebar
+  const old = document.getElementById('active-chat');
+  if (old) old.classList.remove('on');
+
+  const chats = document.getElementById('sb-chats');
+  const item = document.createElement('div');
+  item.className = 'chat-row on';
+  item.id = 'active-chat';
+  item.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>New conversation</span>`;
+  chats.prepend(item);
+
+  const inner = document.getElementById('msgs-inner');
+  inner.innerHTML = `<div class="welcome" id="welcome">
+    <div class="wlogo">🧭</div>
+    <h2>What would you like to decide?</h2>
+    <p class="welcome-sub">Your AI life decision advisor — powered by Claude with live web search.</p>
+    <div class="wgrid">
+      <div class="wcard" onclick="quickSend('I am thinking about changing my career. Help me think through it.')"><div class="wcard-icon">🧳</div><div class="wcard-title">Career change</div><div class="wcard-desc">Job switch, promotion, freelance</div></div>
+      <div class="wcard" onclick="quickSend('I need help with a relationship decision.')"><div class="wcard-icon">❤️</div><div class="wcard-title">Relationship</div><div class="wcard-desc">Commitment, breakup, marriage</div></div>
+      <div class="wcard" onclick="quickSend('Should I start my own business?')"><div class="wcard-icon">💼</div><div class="wcard-title">Start a business</div><div class="wcard-desc">Startup, side hustle, going solo</div></div>
+      <div class="wcard" onclick="quickSend('I feel stuck in life, what should I do?')"><div class="wcard-icon">🌱</div><div class="wcard-title">Feeling stuck</div><div class="wcard-desc">Purpose, direction, life change</div></div>
+      <div class="wcard" onclick="quickSend('Should I go back to university?')"><div class="wcard-icon">🎓</div><div class="wcard-title">Education</div><div class="wcard-desc">Degree, courses, back to school</div></div>
+      <div class="wcard" onclick="quickSend('Help me with a financial decision.')"><div class="wcard-icon">💰</div><div class="wcard-title">Money & Finance</div><div class="wcard-desc">Investing, debt, big purchases</div></div>
+    </div>
+  </div>`;
+
+  document.getElementById('inp').focus();
+}
+
+// ── EXPORT ──
+function exportChat() {
+  if (!history.length) { alert('Chat first, then export!'); return; }
+  let out = 'COMPASS AI — Conversation Export\n'+new Date().toLocaleString()+'\n'+'─'.repeat(50)+'\n\n';
+  history.forEach(h=>{
+    out += (h.role==='user'?'YOU:\n':'COMPASS AI:\n') + h.content + '\n\n'+'─'.repeat(30)+'\n\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([out],{type:'text/plain'}));
+  a.download = 'compass-'+Date.now()+'.txt';
+  a.click();
+}
+
+document.getElementById('inp').focus();
+
+// ── TYPEWRITER EFFECT — real char-by-char ──
+function typewriterEffect(el, text) {
+  const html = md(text);
+  // Use a wrapper so we can measure total text
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = html;
+  const fullText = wrapper.innerText;
+  const totalChars = fullText.length;
+  
+  // For short messages, just render instantly
+  if (totalChars < 20) {
+    el.innerHTML = html;
+    scroll();
+    return;
+  }
+
+  // Progressively reveal the rendered HTML
+  el.innerHTML = html + '<span class="typing-cursor"></span>';
+  
+  // Staggered opacity reveal per element
+  const allEls = el.querySelectorAll('p, li, h1, h2, h3, pre, blockquote, hr, ul, ol, div');
+  if (allEls.length > 1) {
+    // Staggered element reveal
+    allEls.forEach((child, i) => {
+      child.style.opacity = '0';
+      child.style.transform = 'translateY(6px)';
+      child.style.transition = 'opacity .3s ease, transform .3s ease';
+      setTimeout(() => {
+        child.style.opacity = '1';
+        child.style.transform = 'translateY(0)';
+        scroll();
+      }, i * 120);
+    });
+    // Remove cursor after all revealed
+    setTimeout(() => {
+      const c = el.querySelector('.typing-cursor');
+      if (c) { c.style.transition = 'opacity .3s'; c.style.opacity = '0'; setTimeout(()=>c.remove(), 300); }
+    }, allEls.length * 120 + 400);
+  } else {
+    // Single element — just show with cursor
+    setTimeout(() => {
+      const c = el.querySelector('.typing-cursor');
+      if (c) { c.style.transition = 'opacity .3s'; c.style.opacity = '0'; setTimeout(()=>c.remove(), 300); }
+    }, 1200);
+  }
+  scroll();
+}
+
+// ── REACTIONS ──
+function reactMsg(btn, type) {
+  const parent = btn.closest('.mreact');
+  // Toggle off if already active
+  if (btn.classList.contains('active')) {
+    btn.classList.remove('active');
+    return;
+  }
+  // Deactivate sibling
+  parent.querySelectorAll('.react-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  btn.style.animation = 'reactPop .3s ease';
+  setTimeout(() => btn.style.animation = '', 300);
+}
+
+// ── PROGRESS BAR ──
+let progressInterval = null;
+let progressValue = 0;
+function startProgress() {
+  const bar = document.getElementById('think-progress');
+  bar.style.display = 'block';
+  progressValue = 0;
+  bar.style.width = '0%';
+  progressInterval = setInterval(() => {
+    // Ease toward 90% but never reach 100
+    progressValue += (90 - progressValue) * 0.04;
+    bar.style.width = progressValue + '%';
+  }, 100);
+}
+function stopProgress() {
+  clearInterval(progressInterval);
+  const bar = document.getElementById('think-progress');
+  bar.style.width = '100%';
+  setTimeout(() => { bar.style.display = 'none'; bar.style.width = '0%'; }, 500);
+}
+
+// ── SCROLL FAB ──
+const msgsScroll = document.getElementById('msgs-scroll');
+const scrollFab = document.getElementById('scroll-fab');
+msgsScroll.addEventListener('scroll', () => {
+  const atBottom = msgsScroll.scrollHeight - msgsScroll.scrollTop - msgsScroll.clientHeight < 120;
+  scrollFab.classList.toggle('show', !atBottom);
+});
+function scrollToBottom() {
+  msgsScroll.scrollTo({ top: msgsScroll.scrollHeight, behavior: 'smooth' });
+}
+
+// ── RIPPLE EFFECT on buttons ──
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.wcard, .new-btn, .tb-btn, .ctl, .sug');
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+  ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+});
+
+// ── TTS ──
+let currentUtterance = null;
+function speakMsg(btn) {
+  if ('speechSynthesis' in window) {
+    if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.classList.remove('speaking'); return; }
+    const text = btn.closest('.mbody').querySelector('.bot-content').innerText;
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1; u.pitch = 1;
+    u.onend = () => btn.classList.remove('speaking');
+    btn.classList.add('speaking');
+    speechSynthesis.speak(u);
+  }
+}
+
+// ── VOICE INPUT ──
+let recognition = null;
+function toggleVoice() {
+  const btn = document.getElementById('voice-btn');
+  if (recognition) { recognition.stop(); recognition = null; btn.classList.remove('recording'); return; }
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Voice not supported in this browser'); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.interimResults = true;
+  recognition.continuous = false;
+  btn.classList.add('recording');
+  recognition.onresult = (e) => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('inp').value = t;
+    autoResize(document.getElementById('inp'));
+  };
+  recognition.onend = () => { btn.classList.remove('recording'); recognition = null; };
+  recognition.onerror = () => { btn.classList.remove('recording'); recognition = null; };
+  recognition.start();
+}
+
+// ══════════════════════════════════════
+// MOUSE CURSOR GLOW EFFECT
+// ══════════════════════════════════════
+const glow = document.getElementById('cursor-glow');
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  glow.style.left = mouseX + 'px';
+  glow.style.top = mouseY + 'px';
+  if (!glow.classList.contains('visible')) glow.classList.add('visible');
+});
+document.addEventListener('mouseleave', () => glow.classList.remove('visible'));
+
+// Card spotlight: track mouse position inside cards
+document.addEventListener('mousemove', (e) => {
+  document.querySelectorAll('.wcard').forEach(card => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
+  });
+});
+
+// ══════════════════════════════════════
+// FLOATING ORBS — gentle particles
+// ══════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('orb-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const orbs = [];
+  const COUNT = 18;
+  for (let i = 0; i < COUNT; i++) {
+    orbs.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 2.5 + 1,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.25 + 0.05,
+      hue: Math.random() > 0.5 ? 260 : 220
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw connection lines between nearby orbs
+    for (let i = 0; i < orbs.length; i++) {
+      for (let j = i + 1; j < orbs.length; j++) {
+        const dx = orbs[i].x - orbs[j].x;
+        const dy = orbs[i].y - orbs[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 150) {
+          const alpha = (1 - dist/150) * 0.08;
+          ctx.beginPath();
+          ctx.moveTo(orbs[i].x, orbs[i].y);
+          ctx.lineTo(orbs[j].x, orbs[j].y);
+          ctx.strokeStyle = `rgba(139,92,246,${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (const o of orbs) {
+      // Gentle mouse repulsion
+      const ddx = o.x - mouseX, ddy = o.y - mouseY;
+      const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+      if (dist < 180 && dist > 0) {
+        const force = (180 - dist) / 180 * 0.4;
+        o.x += (ddx / dist) * force;
+        o.y += (ddy / dist) * force;
+      }
+      o.x += o.dx; o.y += o.dy;
+      if (o.x < -10) o.x = W + 10;
+      if (o.x > W + 10) o.x = -10;
+      if (o.y < -10) o.y = H + 10;
+      if (o.y > H + 10) o.y = -10;
+
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${o.hue},70%,70%,${o.alpha})`;
+      ctx.fill();
+
+      // Glow effect on orbs near mouse
+      if (dist < 200) {
+        const glowAlpha = (1 - dist/200) * 0.12;
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, o.r * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${o.hue},70%,70%,${glowAlpha})`;
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
